@@ -2,11 +2,7 @@ import re
 from datetime import datetime
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework.permissions import (
-    IsAuthenticatedOrReadOnly,
-    IsAdminUser,
-    AllowAny,
-)
+from rest_framework.permissions import IsAdminUser, AllowAny, BasePermission, SAFE_METHODS
 from rest_framework.decorators import action
 from drf_spectacular.utils import extend_schema, extend_schema_view
 
@@ -21,6 +17,17 @@ from .serializers import (
     TouristPlaceListSerializer, TouristPlaceDetailSerializer,
     AdvantageSerializer, ReviewSerializer, RentalStepSerializer, PromotionSerializer
 )
+
+
+class IsAdminOrReadOnly(BasePermission):
+    """
+    Чтение (GET, HEAD, OPTIONS) — доступно всем, без авторизации.
+    Изменение (POST, PUT, PATCH, DELETE) — только админу (is_staff=True).
+    """
+    def has_permission(self, request, view):
+        if request.method in SAFE_METHODS:
+            return True
+        return bool(request.user and request.user.is_staff)
 
 
 # ========== УНААЛАР ==========
@@ -40,12 +47,7 @@ class CarViewSet(viewsets.ModelViewSet):
     - POST/PUT/PATCH/DELETE — только админ (is_staff=True)
     """
     queryset = Car.objects.filter(is_available=True)
-
-    def get_permissions(self):
-        """Чтение доступно всем, добавление/изменение/удаление — только админу"""
-        if self.action in ['list', 'retrieve']:
-            return [AllowAny()]
-        return [IsAdminUser()]
+    permission_classes = [IsAdminOrReadOnly]
 
     def get_serializer_class(self):
         """Деталдуу барак үчүн башка сериалайзер"""
@@ -94,7 +96,7 @@ class CarViewSet(viewsets.ModelViewSet):
 class ExtraServiceViewSet(viewsets.ModelViewSet):
     queryset = ExtraService.objects.all()
     serializer_class = ExtraServiceSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
 
 
 # ========== БРОНДОО ==========
@@ -116,7 +118,7 @@ class BookingViewSet(viewsets.ModelViewSet):
     serializer_class = BookingSerializer
 
     def get_permissions(self):
-        """Создание доступно всем, остальное — только админу"""
+        """Создание доступно всем (клиент бронирует), остальное — только админу"""
         if self.action == 'create':
             return [AllowAny()]
         return [IsAdminUser()]
@@ -232,7 +234,7 @@ class TouristPlaceViewSet(viewsets.ModelViewSet):
     - POST/PUT/DELETE — только админ (JWT)
     """
     queryset = TouristPlace.objects.all()
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
 
     def get_serializer_class(self):
         """Деталдуу барак үчүн башка сериалайзер"""
@@ -254,7 +256,7 @@ class AdvantageViewSet(viewsets.ModelViewSet):
     """Почему нам доверяют?"""
     queryset = Advantage.objects.all()
     serializer_class = AdvantageSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
 
 
 @extend_schema_view(
@@ -269,7 +271,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     """Отзывы о нашей компании"""
     queryset = Review.objects.filter(is_published=True)
     serializer_class = ReviewSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
 
 
 @extend_schema_view(
@@ -284,7 +286,7 @@ class RentalStepViewSet(viewsets.ModelViewSet):
     """Как происходит аренда автомобиля"""
     queryset = RentalStep.objects.all()
     serializer_class = RentalStepSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
 
 
 @extend_schema_view(
@@ -299,4 +301,4 @@ class PromotionViewSet(viewsets.ModelViewSet):
     """Предложения для клиентов — акции"""
     queryset = Promotion.objects.filter(is_active=True)
     serializer_class = PromotionSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]

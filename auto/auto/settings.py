@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-k-jhw_oys$2=7hn(2!s_scg$0b^(zz0@x16!xmem-l-zcuj^a-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['.onrender.com', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -43,14 +43,12 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'drf_spectacular',
-    'rest_framework.authtoken',
-    'rest_framework_simplejwt',
     'corsheaders',
     'rentcar',
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # Муну эң жогору коюңуз
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -82,32 +80,12 @@ TEMPLATES = [
 from datetime import timedelta
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
-
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
-    ),
-
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',
     ),
 
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
-
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-    'ROTATE_REFRESH_TOKENS': True,
-    'BLACKLIST_AFTER_ROTATION': True,
-    'AUTH_HEADER_TYPES': ('Bearer',),
-}
-##SIMPLE_JWT = {
-  #  'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-   # 'REFRESH_TOKEN_LIFETIME' : timedelta(days=1),
-#}
 
 
 WSGI_APPLICATION = 'auto.wsgi.application'
@@ -170,7 +148,7 @@ MAILERS = {
     },
 }
 
-
+ROOT_DIRECTORY = 'auto'
 # Сүрөттөр үчүн
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
