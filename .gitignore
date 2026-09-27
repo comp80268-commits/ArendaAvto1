@@ -9,4 +9,4 @@ htmlcov/
 media/*
 !media/.gitkeep
 .idea/
-
+requirements.txt
